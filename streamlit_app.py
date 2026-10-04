@@ -17,6 +17,9 @@ VOICES = {
     "Uzma — Urdu (Pakistan, Female)": "ur-PK-UzmaNeural",
     "Swara — Hindi (India, Female)": "hi-IN-SwaraNeural",
     "Aria — English (US, Female)": "en-US-AriaNeural",
+    "Guy — English (US, Male)": "en-US-GuyNeural",
+    "Ryan — English (UK, Male)": "en-GB-RyanNeural",
+    "Davis — English (US, Male)": "en-US-DavisNeural",
 }
 
 VOLUMES = {
