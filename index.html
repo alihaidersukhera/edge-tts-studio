@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edge TTS Studio — Free Text to Speech</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .container { width: 100%; max-width: 640px; }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 { font-size: 2rem; margin-bottom: 6px; }
+  header p { color: var(--muted); font-size: 0.95rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+  label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 0.9rem; }
+  textarea, select {
+    width: 100%;
+    background: #0f172a;
+    color: var(--text);
+    border: 1px solid #475569;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea { resize: vertical; min-height: 140px; line-height: 1.5; }
+  textarea:focus, select:focus { border-color: var(--accent); }
+  .counter { text-align: right; color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+  button#generate {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button#generate:hover:not(:disabled) { background: var(--accent-hover); }
+  button#generate:active:not(:disabled) { transform: scale(0.99); }
+  button#generate:disabled { opacity: 0.55; cursor: not-allowed; }
+  .spinner {
+    width: 40px; height: 40px;
+    margin: 18px auto 0;
+    border: 4px solid #334155;
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none !important; }
+  .status { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
+  #result { margin-top: 18px; text-align: center; }
+  audio { width: 100%; margin-bottom: 12px; }
+  a.dl {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #16a34a;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+  a.dl:hover { background: #15803d; }
+  .error {
+    margin-top: 14px;
+    padding: 12px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid var(--danger);
+    border-radius: 10px;
+    color: var(--danger);
+    font-size: 0.9rem;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 20px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔊 Edge TTS Studio</h1>
+      <p>Free text-to-speech — Urdu, Hindi &amp; English voices</p>
+    </header>
+
+    <main class="card">
+      <label for="text">Your text</label>
+      <textarea id="text" maxlength="10000"
+        placeholder="Type or paste text here… (Urdu, Hindi ya English)"></textarea>
+      <div class="counter"><span id="counter">0</span> / 10000</div>
+
+      <label for="voice">Voice</label>
+      <select id="voice">
+        <option value="asad">Asad — Urdu (Pakistan, Male)</option>
+        <option value="uzma">Uzma — Urdu (Pakistan, Female)</option>
+        <option value="hindi">Swara — Hindi (India, Female)</option>
+        <option value="english">Aria — English (US, Female)</option>
+      </select>
+
+      <label for="volume">Volume</label>
+      <select id="volume">
+        <option value="+0%">Normal</option>
+        <option value="+50%" selected>Loud (+50%)</option>
+        <option value="+100%">Extra loud (+100%)</option>
+      </select>
+
+      <button id="generate">🎙️ Generate Audio</button>
+      <div id="spinner" class="spinner hidden"></div>
+      <p id="status" class="status"></p>
+
+      <div id="result" class="hidden">
+        <audio id="player" controls></audio>
+        <a id="download" class="dl" download="speech.mp3">⬇️ Download MP3</a>
+      </div>
+
+      <p id="error" class="error hidden"></p>
+    </main>
+
+    <footer>Powered by Microsoft Edge TTS (free) · FastAPI backend</footer>
+  </div>
+
+<script>
+  const textEl   = document.getElementById("text");
+  const voiceEl  = document.getElementById("voice");
+  const volumeEl = document.getElementById("volume");
+  const btn      = document.getElementById("generate");
+  const spinner  = document.getElementById("spinner");
+  const statusEl = document.getElementById("status");
+  const resultEl = document.getElementById("result");
+  const player   = document.getElementById("player");
+  const dlLink   = document.getElementById("download");
+  const errorEl  = document.getElementById("error");
+  const counter  = document.getElementById("counter");
+
+  // Character counter
+  textEl.addEventListener("input", () => { counter.textContent = textEl.value.length; });
+
+  // Load voices from the backend (falls back to the hardcoded options above)
+  (async () => {
+    try {
+      const res = await fetch("/api/voices");
+      if (!res.ok) return;
+      const voices = await res.json();
+      voiceEl.innerHTML = "";
+      voices.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.key;
+        opt.textContent = v.label;
+        voiceEl.appendChild(opt);
+      });
+    } catch (e) { /* keep the static fallback options */ }
+  })();
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove("hidden");
+  }
+  function clearError() {
+    errorEl.textContent = "";
+    errorEl.classList.add("hidden");
+  }
+
+  btn.addEventListener("click", async () => {
+    const text = textEl.value.trim();
+    clearError();
+    if (!text) { showError("Please enter some text first."); return; }
+
+    btn.disabled = true;
+    spinner.classList.remove("hidden");
+    statusEl.textContent = "Generating audio…";
+    resultEl.classList.add("hidden");
+
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice: voiceEl.value, volume: volumeEl.value })
+      });
+
+      if (!res.ok) {
+        let msg = "Generation failed.";
+        try { msg = (await res.json()).detail || msg; } catch (e) {}
+        throw new Error(msg);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      player.src = url;
+      dlLink.href = url;
+      resultEl.classList.remove("hidden");
+      statusEl.textContent = "Done! Play it above or download the MP3.";
+      player.play().catch(() => {});
+    } catch (err) {
+      showError("Error: " + err.message);
+      statusEl.textContent = "";
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add("hidden");
+    }
+  });
+</script>
+</body>
+</html>
