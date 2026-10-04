@@ -25,7 +25,7 @@ VOLUMES = {
     "Extra loud (+100%)": "+100%",
 }
 
-MAX_CHARS = 10000
+MAX_CHARS = 300000
 
 
 async def generate_audio(text: str, voice_id: str, volume: str) -> bytes:
