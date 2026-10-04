@@ -15,8 +15,21 @@ st.set_page_config(page_title="Edge TTS Studio", page_icon="🔊")
 VOICES = {
     "Asad — Urdu (Pakistan, Male)": "ur-PK-AsadNeural",
     "Uzma — Urdu (Pakistan, Female)": "ur-PK-UzmaNeural",
+    "Gul — Urdu (India, Female)": "ur-IN-GulNeural",
+    "Salman — Urdu (India, Male)": "ur-IN-SalmanNeural",
     "Swara — Hindi (India, Female)": "hi-IN-SwaraNeural",
+    "Madhur — Hindi (India, Male)": "hi-IN-MadhurNeural",
+    "Aarav — Hindi (India, Male)": "hi-IN-AaravNeural",
+    "Ananya — Hindi (India, Female)": "hi-IN-AnanyaNeural",
+    "Aarti — Hindi (India, Female)": "hi-IN-AartiNeural",
+    "Arjun — Hindi (India, Male)": "hi-IN-ArjunNeural",
+    "Kavya — Hindi (India, Female)": "hi-IN-KavyaNeural",
+    "Kunal — Hindi (India, Male)": "hi-IN-KunalNeural",
+    "Rehaan — Hindi (India, Male)": "hi-IN-RehaanNeural",
     "Aria — English (US, Female)": "en-US-AriaNeural",
+    "Guy — English (US, Male)": "en-US-GuyNeural",
+    "Ryan — English (UK, Male)": "en-GB-RyanNeural",
+    "Davis — English (US, Male)": "en-US-DavisNeural",
 }
 
 VOLUMES = {
@@ -25,7 +38,7 @@ VOLUMES = {
     "Extra loud (+100%)": "+100%",
 }
 
-MAX_CHARS = 10000
+MAX_CHARS = 300000
 
 
 async def generate_audio(text: str, voice_id: str, volume: str) -> bytes:
